@@ -515,7 +515,9 @@ public class CUIGraphic : BaseMeshEffect
         // use tangent and start and end time to derive control point 2 and 3
     }
 
-    public override void ModifyMesh(Mesh _mesh)
+#if UNITY_5_3_OR_NEWER
+
+        public override void ModifyMesh(Mesh _mesh)
     {
 
         if (!IsActive())
@@ -543,6 +545,33 @@ public class CUIGraphic : BaseMeshEffect
         _vh.Clear();
         _vh.AddUIVertexTriangleStream(vertexList);
     }
+
+#else
+
+
+    public override void ModifyMesh(Mesh _mesh)
+    {
+
+        if (!IsActive())
+            return;
+
+        using (VertexHelper vh = new VertexHelper(_mesh))
+        {
+            //ModifyMesh(vh);
+
+            List<UIVertex> vertexList = new List<UIVertex>();
+            vh.GetUIVertexStream(vertexList);
+
+            modifyVertices(vertexList);
+
+            VertexHelper newVH = new VertexHelper();
+            newVH.AddUIVertexTriangleStream(vertexList);
+
+            newVH.FillMesh(_mesh);
+        } 
+    }
+
+#endif
 
     protected virtual void modifyVertices(List<UIVertex> _verts)
     {
@@ -601,9 +630,9 @@ public class CUIGraphic : BaseMeshEffect
         }
     }
 
-    #endregion
+#endregion
     // Methods that serves other objects 
-    #region Services
+#region Services
 
     public Vector3 GetBCurveSandwichSpacePoint(float _xTime, float _yTime)
     {
@@ -616,6 +645,6 @@ public class CUIGraphic : BaseMeshEffect
         return refCurves[0].GetTangent(_xTime) * (1 - _yTime) + refCurves[1].GetTangent(_xTime) * _yTime;
     }
 
-    #endregion
+#endregion
 
 }
